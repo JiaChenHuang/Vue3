@@ -1,6 +1,5 @@
 <template>
   <div id="app">
-    <h1>{{ todosRef.length }}</h1>
 
     <section class="todoapp">
       <header class="header">
@@ -68,10 +67,8 @@ import useNewTodo from "./composition/useNewTodo";
 export default {
   setup() {
     const { todosRef } = useTodoList();
-    const { newTodoRef} = useNewTodo()
     return {
-      todosRef,
-      newTodoRef
+      ...useNewTodo(todosRef)
     };
   },
 };
