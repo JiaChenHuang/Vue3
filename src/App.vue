@@ -1,6 +1,5 @@
 <template>
   <div id="app">
-
     <section class="todoapp">
       <header class="header">
         <h1>todos</h1>
@@ -14,46 +13,69 @@
         />
       </header>
       <section class="main">
-        <input id="toggle-all" class="toggle-all" type="checkbox" />
+        <input
+          id="toggle-all"
+          class="toggle-all"
+          v-model="allDoneRef"
+          type="checkbox"
+        />
         <label for="toggle-all">Mark all as complete</label>
         <ul class="todo-list">
-          <li class="todo">
+          <li
+            class="todo"
+            :class="{
+              completed: item.completed,
+              editing: item === editingTodoRef,
+            }"
+            v-for="item in filteredTodosRef"
+            :key="item.id"
+          >
             <div class="view">
-              <input class="toggle" type="checkbox" />
-              <label>学习composition api</label>
-              <button class="destroy"></button>
+              <input class="toggle" type="checkbox"  v-model="item.completed" />
+              <label @dblclick="editTodo(item)">{{ item.title }}</label>
+              <button class="destroy" @click="remove(item)"></button>
             </div>
-            <input class="edit" type="text" />
-          </li>
-          <li class="todo">
-            <div class="view">
-              <input class="toggle" type="checkbox" />
-              <label>投递50封简历</label>
-              <button class="destroy"></button>
-            </div>
-            <input class="edit" type="text" />
-          </li>
-          <li class="todo">
-            <div class="view">
-              <input class="toggle" type="checkbox" />
-              <label>上午10:30 参加面试</label>
-              <button class="destroy"></button>
-            </div>
-            <input class="edit" type="text" />
+            <input
+              class="edit"
+              v-model="item.title"
+              type="text"
+              @blur="doneTodo(item)"
+              @keyup.enter="doneTodo(item)"
+              @keyup.escape="cancelEdit(item)"
+              focus
+            />
           </li>
         </ul>
       </section>
       <footer class="footer">
         <span class="todo-count">
-          <strong>3</strong>
-          <span>items left</span>
+          <strong>{{ remainingRef }}</strong>
+          <span>item{{ remainingRef === 1 ? "" : "s" }} left</span>
         </span>
         <ul class="filters">
-          <li><a href="#/all" class="selected">All</a></li>
-          <li><a href="#/active" class="">Active</a></li>
-          <li><a href="#/completed" class="">Completed</a></li>
+          <li>
+            <a href="#/all" :class="{ selected: visibilityRef === 'all' }"
+              >All</a
+            >
+          </li>
+          <li>
+            <a href="#/active" :class="{ selected: visibilityRef === 'active' }"
+              >Active</a
+            >
+          </li>
+          <li>
+            <a
+              href="#/completed"
+              :class="{ selected: visibilityRef === 'completed' }"
+              >Completed</a
+            >
+          </li>
         </ul>
-        <button class="clear-completed" style="display: none">
+        <button
+          class="clear-completed"
+          v-show="completedRef > 0"
+          @click="removeCompleted"
+        >
           Clear completed
         </button>
       </footer>
@@ -64,11 +86,17 @@
 <script>
 import useTodoList from "./composition/useTodoList";
 import useNewTodo from "./composition/useNewTodo";
+import useFilter from "./composition/useFilter";
+import useEditTodo from "./composition/useEditTodo";
+import useRemoveTodo from "./composition/useRemoveTodo";
 export default {
   setup() {
     const { todosRef } = useTodoList();
     return {
-      ...useNewTodo(todosRef)
+      ...useNewTodo(todosRef),
+      ...useFilter(todosRef),
+      ...useEditTodo(todosRef),
+      ...useRemoveTodo(todosRef),
     };
   },
 };
